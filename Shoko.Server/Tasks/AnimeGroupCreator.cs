@@ -394,7 +394,8 @@ namespace Shoko.Server.Tasks
             {
                 animeGroup = new SVR_AnimeGroup();
                 animeGroup.Populate(series, DateTime.Now);
-                RepoFactory.AnimeGroup.Save(animeGroup, true, true);
+                series.AnimeGroupID = animeGroup.AnimeGroupID;
+                RepoFactory.AnimeGroup.Save(animeGroup, true, true, false);
             }
 
             return animeGroup;

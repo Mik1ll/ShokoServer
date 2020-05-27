@@ -810,7 +810,7 @@ ORDER BY count(DISTINCT AnimeID) DESC, Anime_GroupName ASC";
 
             series.Populate(this);
             // Populate before making a group to ensure IDs and stats are set for group filters.
-            RepoFactory.AnimeSeries.Save(series, false, false);
+            RepoFactory.AnimeSeries.Save(series, false, false, true);
 
             if (existingGroupID == null)
             {
