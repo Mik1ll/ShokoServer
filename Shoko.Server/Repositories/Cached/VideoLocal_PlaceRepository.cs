@@ -69,22 +69,15 @@ namespace Shoko.Server.Repositories.Cached
 
         public static Tuple<SVR_ImportFolder, string> GetFromFullPath(string fullPath)
         {
-            IReadOnlyList<SVR_ImportFolder> shares = RepoFactory.ImportFolder.GetAll();
+            IReadOnlyList<SVR_ImportFolder> shares = RepoFactory.ImportFolder.GetAll().OrderByDescending(shares => shares.ImportFolderLocation.Length).ToList();
 
-            // TODO make sure that import folders are not sub folders of each other
             // TODO make sure import folders do not contain a trailing "\"
             foreach (SVR_ImportFolder ifolder in shares)
             {
-                string importLocation = ifolder.ImportFolderLocation;
-                string importLocationFull = importLocation.TrimEnd(Path.DirectorySeparatorChar);
-
-                // add back the trailing back slashes
-                importLocationFull = importLocationFull + $"{Path.DirectorySeparatorChar}";
-
-                importLocation = importLocation.TrimEnd(Path.DirectorySeparatorChar);
-                if (fullPath.StartsWith(importLocationFull, StringComparison.InvariantCultureIgnoreCase))
+                string importLocation = Path.TrimEndingDirectorySeparator(ifolder.ImportFolderLocation);
+                if (fullPath.StartsWith(importLocation, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    string filePath = fullPath.Replace(importLocation, string.Empty);
+                    string filePath = fullPath.Replace(importLocation, string.Empty, StringComparison.InvariantCultureIgnoreCase);
                     filePath = filePath.TrimStart(Path.DirectorySeparatorChar);
                     return new Tuple<SVR_ImportFolder, string>(ifolder, filePath);
                 }

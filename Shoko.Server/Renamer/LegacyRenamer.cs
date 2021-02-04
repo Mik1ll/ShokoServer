@@ -12,6 +12,7 @@ using Shoko.Plugin.Abstractions.Attributes;
 using Shoko.Plugin.Abstractions.DataModels;
 using Shoko.Server.Models;
 using Shoko.Server.Repositories;
+using Shoko.Server.Repositories.Cached;
 using Shoko.Server.Server;
 using Shoko.Server.Settings;
 using Shoko.Server.Utilities;
@@ -1314,10 +1315,9 @@ namespace Shoko.Server.Renamer
         public static string GetNewFileName(RenameEventArgs args, string script)
         {
             // Cheat and just look it up by location to avoid rewriting this whole file.
-            var sourceFolder = RepoFactory.ImportFolder.GetAll().FirstOrDefault(a => args.FileInfo.FilePath.StartsWith(a.ImportFolderLocation));
-            if (sourceFolder == null) throw new Exception("*Unable to get import folder");
-            var place = RepoFactory.VideoLocalPlace.GetByFilePathAndImportFolderID(
-                args.FileInfo.FilePath.Replace(sourceFolder.ImportFolderLocation, ""), sourceFolder.ImportFolderID);
+            var tup = VideoLocal_PlaceRepository.GetFromFullPath(args.FileInfo.FilePath);
+            (var sourceFolder, var filePath) = tup ?? throw new Exception("*Unable to get import folder");
+            var place = RepoFactory.VideoLocalPlace.GetByFilePathAndImportFolderID(filePath, sourceFolder.ImportFolderID);
             SVR_VideoLocal vid = place?.VideoLocal;
             string[] lines = script.Split(Environment.NewLine.ToCharArray());
 
