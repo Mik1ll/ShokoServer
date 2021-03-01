@@ -29,7 +29,7 @@ namespace Shoko.Server.FileHelper.Subtitles
             var basename = Path.GetFileNameWithoutExtension(path);
 
             var streams = new List<TextStream>();
-            foreach (FileInfo file in directory.EnumerateFiles())
+            foreach (FileInfo file in directory.EnumerateFiles("*", SearchOption.AllDirectories))
             {
                 // Make sure it's actually the subtitle for this video file
                 if (!file.Name.StartsWith(basename)) continue;
