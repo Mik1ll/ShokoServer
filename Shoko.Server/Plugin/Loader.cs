@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Loader;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using Shoko.Commons.Extensions;
@@ -31,7 +32,7 @@ namespace Shoko.Server.Plugin
             var userPluginDir = Path.Combine(ServerSettings.ApplicationPath, "plugins");
             var userPlugins = Directory.Exists(userPluginDir) ? Directory.GetFiles(userPluginDir, "*.dll", SearchOption.AllDirectories) : new string[0];
             
-            foreach (var dll in userPlugins.Concat(Directory.GetFiles(dirname, "plugins/*.dll", SearchOption.AllDirectories)))
+            foreach (var dll in userPlugins.Concat(Directory.GetFiles(dirname, "plugins/*.dll", SearchOption.AllDirectories)).OrderByDescending(x => Path.GetDirectoryName(x)!.Length))
             {
                 try
                 {
@@ -43,7 +44,8 @@ namespace Shoko.Server.Plugin
                         continue;
                     }
                     Logger.Debug($"Trying to load {dll}");
-                    assemblies.Add(Assembly.LoadFrom(dll));
+                    var loadContext = new PluginLoadContext(dll);
+                    assemblies.Add(loadContext.LoadFromAssemblyPath(dll));
                     // TryAdd, because if it made it this far, then it's missing or true.
                     ServerSettings.Instance.Plugins.EnabledPlugins.TryAdd(name, true);
                     if (!ServerSettings.Instance.Plugins.Priority.Contains(name))
@@ -147,6 +149,38 @@ namespace Shoko.Server.Plugin
             {
                 Logger.Error(e, $"Unable to Save Settings for {name}");
             }
+        }
+    }
+    
+    class PluginLoadContext : AssemblyLoadContext
+    {
+        private AssemblyDependencyResolver _resolver;
+
+        public PluginLoadContext(string pluginPath)
+        {
+            _resolver = new AssemblyDependencyResolver(pluginPath);
+        }
+
+        protected override Assembly Load(AssemblyName assemblyName)
+        {
+            string assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
+            if (assemblyPath != null)
+            {
+                return LoadFromAssemblyPath(assemblyPath);
+            }
+
+            return null;
+        }
+
+        protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
+        {
+            string libraryPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+            if (libraryPath != null)
+            {
+                return LoadUnmanagedDllFromPath(libraryPath);
+            }
+
+            return IntPtr.Zero;
         }
     }
 }
