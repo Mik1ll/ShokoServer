@@ -63,7 +63,11 @@ namespace Shoko.TrayService
             menu.Items.Add(webui);
             webui = new MenuItem();
             webui.Header = "Exit";
-            webui.Click += (sender, args) => Dispatcher.Invoke(Shutdown);
+            webui.Click += (sender, args) =>
+            {
+                ShokoServer.Instance.ShutDown();
+                Dispatcher.Invoke(Shutdown);
+            };
             menu.Items.Add(webui);
             Icon.ContextMenu = menu;
             Icon.MenuActivation = PopupActivationMode.All;

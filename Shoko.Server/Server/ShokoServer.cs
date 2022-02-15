@@ -1011,11 +1011,12 @@ namespace Shoko.Server.Server
 
         #region Tray Minimize
 
-        private void ShutDown()
+        public void ShutDown()
         {
             StopWatchingFiles();
             AniDBDispose();
             StopHost();
+            NLog.LogManager.Shutdown();
             ServerShutdown?.Invoke(this, null);
             Analytics.PostEvent("Server", "Shutdown");
         }
