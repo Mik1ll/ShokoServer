@@ -60,5 +60,6 @@ namespace Shoko.Plugin.Abstractions.DataModels
         TVSpecial = 3,
         Web = 4,
         Other = 5,
+        MusicVideo = 6
     }
 }
