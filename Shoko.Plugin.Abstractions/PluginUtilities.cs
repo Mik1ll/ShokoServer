@@ -68,26 +68,4 @@ public static class PluginUtilities
         var zeroPadding = total.ToString().Length;
         return num.ToString().PadLeft(zeroPadding, '0');
     }
-
-    /// <summary>
-    /// Split the width and height of a video resolution string into integers
-    /// </summary>
-    /// <param name="resolution"></param>
-    /// <returns>Tuple containing separated width and height</returns>
-    public static (int Width, int Height) SplitVideoResolution(string resolution)
-    {
-        var videoWidth = 0;
-        var videoHeight = 0;
-        if (resolution.Trim().Length > 0)
-        {
-            var dimensions = resolution.Split('x');
-            if (dimensions.Length > 1)
-            {
-                int.TryParse(dimensions[0], out videoWidth);
-                int.TryParse(dimensions[1], out videoHeight);
-            }
-        }
-
-        return (videoWidth, videoHeight);
-    }
 }
